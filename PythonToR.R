@@ -1,4 +1,4 @@
-# reticulate::use_python("C:\\Users\\Ross\\Anaconda3\\envs\\tensorflowgpu\\python.exe",required = T)
+reticulate::use_python("C:\\Users\\Ross\\Anaconda3\\envs\\tensorflowgpu\\python.exe",required = T)
 library("reticulate")
 # use_condaenv(condaenv = "tensorflowgpu")
 # 改變python環境
