@@ -11,7 +11,7 @@ def global_average_pooling(x):
 
 
 
-def Visualize_Cam(origin_image, cute_model, last_conv_pos, W=299, H=299, ch=3):
+def Visualize_Cam(origin_image, cute_model, last_conv_pos, W=299, H=299, ch=3, img_no=None):
     # 必須為GAP接SOFTMAX的model
     # origin_image = cv2.imread(image_path)
     width, height, _ = origin_image.shape
@@ -47,7 +47,7 @@ def Visualize_Cam(origin_image, cute_model, last_conv_pos, W=299, H=299, ch=3):
     pred_image = (heatmap * .5 + origin_image * 0.5).astype('uint8')
     # print(img.dtype)
     # pred_image = pred_image.reshape(W, H, ch)
-    cv2.imwrite("predimg/output_img.jpg", pred_image)
+    cv2.imwrite("predimg/output_img"+str(int(img_no))+".jpg", pred_image)
 
 
 def hack_model():

@@ -98,7 +98,7 @@ We hope through AI help our world become more convenient and helpful no matter h
           incProgress(0.5,detail = "part 1") # 當上面那行結束，進度條就達到50%
           # 畫圖
           module$Visualize_Cam(origin_image = cv_img(), cute_model = model_chen,
-                               last_conv_pos = -3L, W =  299L, H = 299L)
+                               last_conv_pos = -3L, W =  299L, H = 299L, img_no = user_img_no$num)
           incProgress(1,detail = "part 2")
           Sys.sleep(0.2)
       })
@@ -164,14 +164,17 @@ We hope through AI help our world become more convenient and helpful no matter h
   output$pred_img_False<-renderText({
       HTML("<font color=\"#000000\"><font size=\"6\"><b>Magic:)</b></font>")
   })
+  
+  
+  
   # timer update
   # 這邊也不一定要設path，只是個indicator說路徑裡有沒有檔案，因為預測輸出的路徑跟檔名都固定了
   predict_path<-reactiveValues(path=NULL) 
   observeEvent(reactiveTimer(1000)(),{ # Timer，每1000毫秒會更新一次這個block
-      if(!file.exists("predimg/output_img.jpg")){
+      if(!file.exists(paste0("predimg/output_img",user_img_no$num,".jpg"))){
           predict_path$path=NULL
       }else{
-          predict_path$path="predimg/output_img.jpg"
+          predict_path$path=paste0("predimg/output_img",user_img_no$num,".jpg")
       }
   })
   # 預測的檔案如果存在則輸出
@@ -183,7 +186,7 @@ We hope through AI help our world become more convenient and helpful no matter h
           ))
       }else{
           return(list(
-              src = "predimg/output_img.jpg" # predict_path$path
+              src = predict_path$path
               ,width=500
               ,height=400
               ,contentType = "image/jpeg"
@@ -222,8 +225,9 @@ We hope through AI help our world become more convenient and helpful no matter h
       file.copy(from=input$upload_file$datapath # 因為python模組那邊無法讀到虛擬路徑，所以在
                 ,to=paste0("tempimg/temp",user_img_no$num,".jpg"))
       # 為了避免上傳了要被判斷的圖，就(1st round)/仍輸出上一輪已產出的圖，要先把資料夾中上一輪的圖刪掉
-      if(file.exists("predimg/output_img.jpg")){ 
-          file.remove("predimg/output_img.jpg")
-      }
+      # 可以不用再將圖刪掉了
+      # if(file.exists("predimg/output_img.jpg")){ 
+      #     file.remove("predimg/output_img.jpg")
+      # }
   })
 }
