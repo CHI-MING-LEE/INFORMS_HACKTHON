@@ -90,7 +90,8 @@ We hope through AI help our world become more convenient and helpful no matter h
   })
   
   # predict & output CAM plot
-  python_module <- eventReactive(input$python,{
+  # 要有人呼叫到他，有dependency，按按鈕才有用 (原本是用eventReactive)
+  observeEvent(input$python,{
       withProgress(message = 'Still Computing...',detail="part 1", value = 0, {
           # 預測
           result = module$model_pred(cute_model = model_lin, img_matrix = cv_img(), W = 299L, H = 299L)
@@ -101,7 +102,53 @@ We hope through AI help our world become more convenient and helpful no matter h
           incProgress(1,detail = "part 2")
           Sys.sleep(0.2)
       })
-      return(result)
+      
+      # 沒預測檔案就視同什麼結果都沒
+      # 原本必須確保python_module()有被連動到，改成observeEvent就沒差
+      output$Bigsuggestion <- renderText({
+          if(is.null(predict_path$path)){
+              return(NULL)
+          }
+          if(result=="Normal"){
+              paste0("
+                     <font color=\"#000000\"><font size=\"5\"><b>Congratulations!</b></font></font>
+                     <font color=\"#000000\"><font size=\"5\"><b>You belong to ","<font color=\"#0da32d\">",result," group!</b></font></font></font><br/>"
+              )%>%HTML()
+          }
+          else if(result=="Seborrheic Keratosis"){
+              paste0("
+                     <font color=\"#000000\"><font size=\"5\"><b>Don't worry!</b></font></font>
+                     <font color=\"#000000\"><font size=\"5\"><b>You belong to ","<font color=\"#142f91\">",result," group!</b></font></font></font><br/>"
+              )%>%HTML()
+          }
+          else{
+              paste0("
+                     <font color=\"#000000\"><font size=\"5\"><b>Warning!</b></font></font>
+               <font color=\"#000000\"><font size=\"5\"><b>You belong to ","<font color=\"#e81717\">",result," group!</b></font></font></font><br/>"
+              )%>%HTML()
+          }
+      })
+      
+      output$suggestion <- renderText({
+          if(is.null(predict_path$path)){
+              return(NULL)
+          }
+          if(result=="Normal"){
+              paste0("
+               <font size=\"",font_size,"\"> You are very healthy right now! Remember keeping a balanced diet and exercise three times a week</font>"
+              )%>%HTML()
+          }
+          else if(result=="Seborrheic Keratosis"){
+              paste0("
+               <font size=\"",font_size,"\"> Seborrheic keratosis on human back. Multiple seborrheic keratoses on the dorsum of a patient with Leser–Trelat sign. Specialty Dermatology A seborrheic keratosis, also known as seborrheic verruca, basal cell papilloma, or a senile wart, is a non-cancerous (benign) skin tumour that originates from cells in the outer layer of the skin (keratinocytes), So don’t worry about it. Like liver spots, seborrheic keratoses are seen more often as people age.</font>"
+              )%>%HTML()
+          }
+          else{
+              paste0("
+               <font size=\"",font_size,"\"> Using sunscreen and avoiding UV light may prevent Melanoma. Treatment is typically removal by surgery. In those with slightly larger cancers, nearby lymph nodes may be tested for spread. Most people are cured if spread has not occurred, so please take more careful diagnosis as soon as possible. For those in whom melanoma has spread, immunotherapy, biologic therapy, radiation therapy, or chemotherapy may improve survival.</font>"
+              )%>%HTML()
+          }
+      })
   })
   
   # predicted imgage
@@ -144,47 +191,7 @@ We hope through AI help our world become more convenient and helpful no matter h
       }
   },deleteFile = F)
   
-  output$Bigsuggestion <- renderText({
-      if(is.null(predict_path$path)) # 沒預測檔案就視同什麼結果都沒
-          return(NULL)
-      if(python_module()=="Normal"){
-          paste0("
-               <font color=\"#000000\"><font size=\"5\"><b>Congratulations!</b></font></font>
-               <font color=\"#000000\"><font size=\"5\"><b>You belong to ","<font color=\"#0da32d\">",python_module()," group!</b></font></font></font><br/>"
-          )%>%HTML()
-      }
-      else if(python_module()=="Seborrheic Keratosis"){
-          paste0("
-               <font color=\"#000000\"><font size=\"5\"><b>Don't worry!</b></font></font>
-               <font color=\"#000000\"><font size=\"5\"><b>You belong to ","<font color=\"#142f91\">",python_module()," group!</b></font></font></font><br/>"
-          )%>%HTML()
-      }
-      else{
-          paste0("
-               <font color=\"#000000\"><font size=\"5\"><b>Warning!</b></font></font>
-               <font color=\"#000000\"><font size=\"5\"><b>You belong to ","<font color=\"#e81717\">",python_module()," group!</b></font></font></font><br/>"
-          )%>%HTML()
-      }
-  })
-  output$suggestion <- renderText({
-      if(is.null(predict_path$path))
-          return(NULL)
-      if(python_module()=="Normal"){
-          paste0("
-               <font size=\"",font_size,"\"> You are very healthy right now! Remember keeping a balanced diet and exercise three times a week</font>"
-          )%>%HTML()
-      }
-      else if(python_module()=="Seborrheic Keratosis"){
-          paste0("
-               <font size=\"",font_size,"\"> Seborrheic keratosis on human back. Multiple seborrheic keratoses on the dorsum of a patient with Leser–Trelat sign. Specialty Dermatology A seborrheic keratosis, also known as seborrheic verruca, basal cell papilloma, or a senile wart, is a non-cancerous (benign) skin tumour that originates from cells in the outer layer of the skin (keratinocytes), So don’t worry about it. Like liver spots, seborrheic keratoses are seen more often as people age.</font>"
-          )%>%HTML()
-      }
-      else{
-          paste0("
-               <font size=\"",font_size,"\"> Using sunscreen and avoiding UV light may prevent Melanoma. Treatment is typically removal by surgery. In those with slightly larger cancers, nearby lymph nodes may be tested for spread. Most people are cured if spread has not occurred, so please take more careful diagnosis as soon as possible. For those in whom melanoma has spread, immunotherapy, biologic therapy, radiation therapy, or chemotherapy may improve survival.</font>"
-          )%>%HTML()
-      }
-  })
+  
   #----Button----
   observeEvent(input$launch, {
     confirmSweetAlert(
