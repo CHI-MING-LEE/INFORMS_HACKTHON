@@ -1,0 +1,12 @@
+.main-header .logo {
+  font-family: "Georgia", Times, "Times New Roman", serif;
+  font-weight: bold;
+  font-size: 16px;
+}
+
+.content-wrapper,
+.right-side {
+  background-image: url('bg.png');
+  background-repeat:no-repeat;
+  background-position: right bottom;
+}
